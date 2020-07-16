@@ -1,6 +1,6 @@
 <?php
 
-namespace Larameter;
+namespace Coremetrics\CoremetricsLaravel;
 
 use React\EventLoop\Factory;
 use React\Socket\Server;
@@ -80,7 +80,7 @@ class Agent
 
         $data_string = json_encode($data);
 
-        $ch = curl_init('http://larameter.test/input');
+        $ch = curl_init('http://coremetrics.test/input');
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -93,7 +93,7 @@ class Agent
 
         if ($result != 'OK')
         {
-            throw new \DomainException($result);
+            var_dump($result);exit;
         }
 
         var_dump(count($buffer));

@@ -1,5 +1,5 @@
 {
-    "name": "aivis/larameter",
+    "name": "coremetrics/coremetrics-laravel",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -11,7 +11,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.0",
-        "illuminate/support": "~5.0|~6.0",
+        "illuminate/support": "~5.0|~6.0|~7.0",
         "clue/socket-raw": "^1.4",
         "react/event-loop": "^1.1",
         "react/socket": "^1.2"
@@ -23,7 +23,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Larameter\\": "src/"
+            "Coremetrics\\CoremetricsLaravel\\": "src/"
         }
     },
     "extra": {
@@ -33,7 +33,7 @@
         ],
         "laravel": {
             "providers": [
-                "Larameter\\LarameterServiceProvider"
+                "Coremetrics\\CoremetricsLaravel\\CoremetricsLaravelServiceProvider"
             ]
         }
     }

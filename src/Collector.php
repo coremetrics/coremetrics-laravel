@@ -1,6 +1,6 @@
 <?php
 
-namespace Larameter;
+namespace Coremetrics\CoremetricsLaravel;
 
 use Socket\Raw\Factory;
 
