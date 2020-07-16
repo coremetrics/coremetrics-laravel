@@ -1,13 +1,13 @@
 <?php
 
-namespace Larameter;
+namespace Coremetrics\CoremetricsLaravel;
 
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Http\Kernel;
 
-class LarameterServiceProvider extends ServiceProvider
+class CoremetricsLaravelServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.
@@ -42,22 +42,22 @@ class LarameterServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('larameter.collector', function()
+        $this->app->singleton('coremetrics.collector', function()
         {
             return new Collector();
         });
 
 
-        $this->app->singleton('larameter.agent', function()
+        $this->app->singleton('coremetrics.agent', function()
         {
             return new Agent();
         });
 
-        $this->app->singleton('larameter.agentDaemon', function ()
+        $this->app->singleton('coremetrics.agentDaemon', function ()
         {
             return new AgentDaemonCommand();
         });
 
-        $this->commands(['larameter.agentDaemon']);
+        $this->commands(['coremetrics.agentDaemon']);
     }
 }

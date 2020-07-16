@@ -1,6 +1,6 @@
 <?php
 
-namespace Larameter;
+namespace Coremetrics\CoremetricsLaravel;
 
 use Illuminate\Console\Command;
 
@@ -12,7 +12,7 @@ class AgentDaemonCommand extends Command
      *
      * @var string
      */
-    protected $name = 'larameter:daemon';
+    protected $name = 'coremetrics:daemon';
 
     /**
      * Execute the console command.
@@ -25,7 +25,7 @@ class AgentDaemonCommand extends Command
 
         $agent->listen();
 
-        $this->info('The Larameter daemon is listening on ' . $agent->connectionAddress);
+        $this->info('The Coremetrics daemon is listening on ' . $agent->connectionAddress);
 
         $agent->loop();
     }
