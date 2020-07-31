@@ -1,8 +1,6 @@
 <?php
 
-namespace Coremetrics\CoremetricsLaravel;
-
-use Socket\Raw\Factory;
+namespace Coremetrics\CoremetricsLaravel\Collector;
 
 class Collector
 {
@@ -13,14 +11,9 @@ class Collector
     const PRECISION = 2;
 
     /**
-     * @var \Socket\Raw\Socket
+     * @var CollectorConnectionManager
      */
-    protected $connection;
-
-    /**
-     * @var string
-     */
-    protected $connectionAddress;
+    protected $connectionManager;
 
     /**
      * @var array
@@ -43,11 +36,11 @@ class Collector
     protected $processName;
 
     /**
-     * @param string $connectionAddress
+     * @param CollectorConnectionManager $connectionManager
      */
-    public function __construct($connectionAddress = '127.0.0.1:8089')
+    public function __construct(CollectorConnectionManager $connectionManager)
     {
-        $this->connectionAddress = $connectionAddress;
+        $this->connectionManager = $connectionManager;
     }
 
     /**
@@ -89,13 +82,11 @@ class Collector
      */
     protected function format($key, $value, array $meta = [], $now = null, $lastMicrotime = null)
     {
-        if ( ! $now)
-        {
+        if (!$now) {
             $now = microtime(true);
         }
 
-        if ( ! $lastMicrotime)
-        {
+        if (!$lastMicrotime) {
             $lastMicrotime = $this->lastMicrotime;
         }
 
@@ -121,29 +112,6 @@ class Collector
 
         $this->buffer = [];
 
-        $this->getConnection()->write($json . "\n");
-    }
-
-    /**
-     * @return void
-     */
-    public function close()
-    {
-        $this->getConnection()->close();
-    }
-
-    /**
-     * @return \Socket\Raw\Socket
-     */
-    protected function getConnection()
-    {
-        if ($this->connection)
-        {
-            return $this->connection;
-        }
-
-        $factory = new Factory();
-
-        return $this->connection = $factory->createClient($this->connectionAddress);
+        $this->connectionManager->write($json);
     }
 }

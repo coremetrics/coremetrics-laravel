@@ -25,7 +25,7 @@ class AgentDaemonCommand extends Command
 
         $agent->listen();
 
-        $this->info('The Coremetrics daemon is listening on ' . $agent->connectionAddress);
+        \Log::info('The Coremetrics daemon is listening on ' . $agent->connectionAddress);
 
         $agent->loop();
     }

@@ -3,6 +3,7 @@
 namespace Coremetrics\CoremetricsLaravel;
 
 use React\EventLoop\Factory;
+use React\Socket\ConnectionInterface;
 use React\Socket\Server;
 
 class Agent
@@ -44,21 +45,23 @@ class Agent
      */
     public function listen()
     {
-        $this->socket->on('connection', function (\React\Socket\ConnectionInterface $connection)
-        {
-            $connection->on('data', function ($data) use ($connection)
-            {
+        $this->socket->on('connection', function (ConnectionInterface $connection) {
+            $connection->on('data', function ($data) use ($connection) {
+                \Log::info('daemon data');
                 $this->buffer[] = json_decode($data, true);
             });
         });
 
-        $this->loop->addPeriodicTimer(3, function ()
-        {
+        $total = microtime(true);
+
+        $this->loop->addPeriodicTimer(3, function () use($total) {
+
+            \Log::info('Daemon lifetime: ' . (microtime(true) - $total));
+
             $buffer = $this->buffer;
             $this->buffer = [];
 
-            if ($buffer)
-            {
+            if ($buffer) {
                 $this->postData($buffer);
             }
         });
@@ -70,12 +73,14 @@ class Agent
     protected function postData($buffer)
     {
 
-        var_dump($buffer);
+        \Log::info('daemon dump');
+
+//        var_dump($buffer);
 //
 //        return;
 
         $data = [
-            'data' =>$buffer
+            'data' => $buffer
         ];
 
         $data_string = json_encode($data);
@@ -91,12 +96,12 @@ class Agent
 
         $result = curl_exec($ch);
 
-        if ($result != 'OK')
-        {
-            var_dump($result);exit;
+        if ($result != 'OK') {
+            \Log::info('daemon dump: response '  . $result);
+            exit;
         }
 
-        var_dump(count($buffer));
+        \Log::info('daemon dump: count '  . count($buffer));
     }
 
     /**

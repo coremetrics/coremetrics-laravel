@@ -2,6 +2,9 @@
 
 namespace Coremetrics\CoremetricsLaravel;
 
+use Coremetrics\CoremetricsLaravel\Collector\Collector;
+use Coremetrics\CoremetricsLaravel\Collector\CollectorConnectionManager;
+use Illuminate\Foundation\Application;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -16,8 +19,7 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if ($this->app->runningInConsole())
-        {
+        if ($this->app->runningInConsole()) {
             return;
         }
 
@@ -31,8 +33,7 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
         $httpKernel = $this->app->make(Kernel::class);
         $httpKernel->prependMiddleware(AppMiddleware::class);
 
-        $this->app['events']->listen(RouteMatched::class, function(RouteMatched $event)
-        {
+        $this->app['events']->listen(RouteMatched::class, function (RouteMatched $event) {
             $event->route->middleware(RouteMiddleware::class);
         });
     }
@@ -42,19 +43,20 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('coremetrics.collector', function()
-        {
-            return new Collector();
+        $this->app->singleton('coremetrics.connectionManager', static function () {
+            return new CollectorConnectionManager();
+        });
+
+        $this->app->singleton('coremetrics.collector', static function (Application $app) {
+            return new Collector($app->make('coremetrics.connectionManager'));
         });
 
 
-        $this->app->singleton('coremetrics.agent', function()
-        {
+        $this->app->singleton('coremetrics.agent', static function () {
             return new Agent();
         });
 
-        $this->app->singleton('coremetrics.agentDaemon', function ()
-        {
+        $this->app->singleton('coremetrics.agentDaemon', static function () {
             return new AgentDaemonCommand();
         });
 
