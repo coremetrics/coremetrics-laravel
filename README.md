@@ -26,4 +26,4 @@ Installation (Host app):
  
  
 Data will be sent to the following hard-coded endpoint:
-https://github.com/coremetrics/coremetrics-laravel/blob/master/src/Larameter/Agent.php#L83
+https://github.com/coremetrics/coremetrics-laravel/blob/master/src/Agent.php#L83
