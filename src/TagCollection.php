@@ -14,7 +14,7 @@ class TagCollection
     const TRANSACTION_BEGINNING = 8;
     const CACHE_MISSED = 9;
     const CACHE_HIT = 10;
-    const MAIL_SENDING  = 11;
+    const MAIL_SENDING = 11;
     const MAIL_SENT = 12;
     const MSG_LOGGED = 13;
     const MIDDLEWARE_START = 14;

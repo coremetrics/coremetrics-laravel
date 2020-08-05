@@ -1,8 +1,6 @@
 <?php
 
-namespace Coremetrics\CoremetricsLaravel;
-
-use Socket\Raw\Factory;
+namespace Coremetrics\CoremetricsLaravel\Collector;
 
 class Collector
 {
@@ -13,14 +11,22 @@ class Collector
     const PRECISION = 2;
 
     /**
-     * @var \Socket\Raw\Socket
+     * Compression keys
      */
-    protected $connection;
+    const COMPR_EVENT_TIMESTAMP = 't';
+    const COMPR_TOTAL_DURATION = 's';
+    const COMPR_PROCESS_NAME = 'n';
+    const COMPR_PROCESS_EVENT_BUFFER = 'l';
+    const COMPR_KEY = 'k';
+    const COMPR_VALUE = 'v';
+    const COMPR_DURATION = 'd';
+    const COMPR_META = 'm';
+    const COMPR_META_TAG = 'mt';
 
     /**
-     * @var string
+     * @var CollectorConnectionManager
      */
-    protected $connectionAddress;
+    protected $connectionManager;
 
     /**
      * @var array
@@ -43,11 +49,11 @@ class Collector
     protected $processName;
 
     /**
-     * @param string $connectionAddress
+     * @param CollectorConnectionManager $connectionManager
      */
-    public function __construct($connectionAddress = '127.0.0.1:8089')
+    public function __construct(CollectorConnectionManager $connectionManager)
     {
-        $this->connectionAddress = $connectionAddress;
+        $this->connectionManager = $connectionManager;
     }
 
     /**
@@ -89,13 +95,11 @@ class Collector
      */
     protected function format($key, $value, array $meta = [], $now = null, $lastMicrotime = null)
     {
-        if ( ! $now)
-        {
+        if (!$now) {
             $now = microtime(true);
         }
 
-        if ( ! $lastMicrotime)
-        {
+        if (!$lastMicrotime) {
             $lastMicrotime = $this->lastMicrotime;
         }
 
@@ -104,7 +108,12 @@ class Collector
 
         $this->totalDuration += ($diff * 1000);
 
-        return ['k' => $key, 'v' => $value, 'm' => $meta, 'd' => round($diff * 1000, self::PRECISION)];
+        return [
+            self::COMPR_KEY => $key,
+            self::COMPR_VALUE => $value,
+            self::COMPR_META => $meta,
+            self::COMPR_DURATION => round($diff * 1000, self::PRECISION)
+        ];
     }
 
     /**
@@ -113,37 +122,14 @@ class Collector
     public function flushBuffer()
     {
         $json = json_encode([
-            't' => round(LARAVEL_START * 1000),
-            's' => round($this->totalDuration, self::PRECISION),
-            'n' => $this->processName,
-            'l' => $this->buffer
+            self::COMPR_EVENT_TIMESTAMP => round(LARAVEL_START * 1000),
+            self::COMPR_TOTAL_DURATION => round($this->totalDuration, self::PRECISION),
+            self::COMPR_PROCESS_NAME => $this->processName,
+            self::COMPR_PROCESS_EVENT_BUFFER => $this->buffer
         ]);
 
         $this->buffer = [];
 
-        $this->getConnection()->write($json . "\n");
-    }
-
-    /**
-     * @return void
-     */
-    public function close()
-    {
-        $this->getConnection()->close();
-    }
-
-    /**
-     * @return \Socket\Raw\Socket
-     */
-    protected function getConnection()
-    {
-        if ($this->connection)
-        {
-            return $this->connection;
-        }
-
-        $factory = new Factory();
-
-        return $this->connection = $factory->createClient($this->connectionAddress);
+        $this->connectionManager->write($json);
     }
 }

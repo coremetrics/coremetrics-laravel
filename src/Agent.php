@@ -2,16 +2,13 @@
 
 namespace Coremetrics\CoremetricsLaravel;
 
+use Psr\Log\LoggerInterface;
 use React\EventLoop\Factory;
+use React\Socket\ConnectionInterface;
 use React\Socket\Server;
 
 class Agent
 {
-
-    /**
-     * @var string
-     */
-    public $connectionAddress;
 
     /**
      * @var Server
@@ -29,14 +26,26 @@ class Agent
     protected $buffer = [];
 
     /**
-     * @param string $connectionAddress
+     * @var Config
      */
-    public function __construct($connectionAddress = '127.0.0.1:8089')
+    protected $config;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
+     * @param Config $config
+     * @param LoggerInterface $logger
+     */
+    public function __construct(Config $config, LoggerInterface $logger)
     {
-        $this->connectionAddress = $connectionAddress;
+        $this->config = $config;
+        $this->logger = $logger;
 
         $this->loop = Factory::create();
-        $this->socket = new Server($this->connectionAddress, $this->loop);
+        $this->socket = new Server($this->config->getAgentServerUri(), $this->loop);
     }
 
     /**
@@ -44,21 +53,29 @@ class Agent
      */
     public function listen()
     {
-        $this->socket->on('connection', function (\React\Socket\ConnectionInterface $connection)
-        {
-            $connection->on('data', function ($data) use ($connection)
-            {
+        $this->socket->on('connection', function (ConnectionInterface $connection) {
+            $connection->on('data', function ($data) use ($connection) {
                 $this->buffer[] = json_decode($data, true);
+                $this->logger->debug('Agent received data', [
+                    'data' =>$data
+                ]);
             });
+
+            $this->logger->info('The Coremetrics daemon is listening on ' . $this->config->getAgentServerUri());
         });
 
-        $this->loop->addPeriodicTimer(3, function ()
-        {
+        $total = microtime(true);
+
+        $this->loop->addPeriodicTimer($this->config->getAgentTimerSeconds(), function () use($total) {
+
+            $this->logger->debug('Agent - addPeriodicTimer', [
+                'total_agent_lifetime' => (microtime(true) - $total)
+            ]);
+
             $buffer = $this->buffer;
             $this->buffer = [];
 
-            if ($buffer)
-            {
+            if ($buffer) {
                 $this->postData($buffer);
             }
         });
@@ -69,34 +86,31 @@ class Agent
      */
     protected function postData($buffer)
     {
-
-        var_dump($buffer);
-//
-//        return;
-
         $data = [
-            'data' =>$buffer
+            'data' => $buffer
         ];
 
-        $data_string = json_encode($data);
+        $requestBody = json_encode($data);
 
-        $ch = curl_init('http://coremetrics.test/input');
+        $this->logger->debug('Agent - postData', [
+            'item_count' => count($buffer),
+            'size' => strlen($requestBody),
+        ]);
+
+        $ch = curl_init($this->config->getRemoteApiUrl());
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'Content-Length: ' . strlen($data_string)
+            'Content-Length: ' . strlen($requestBody)
         ]);
 
         $result = curl_exec($ch);
 
-        if ($result != 'OK')
-        {
-            var_dump($result);exit;
-        }
-
-        var_dump(count($buffer));
+        $this->logger->debug('Agent - postData response', [
+            'response' => $result,
+        ]);
     }
 
     /**

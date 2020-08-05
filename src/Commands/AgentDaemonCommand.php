@@ -1,7 +1,8 @@
 <?php
 
-namespace Coremetrics\CoremetricsLaravel;
+namespace Coremetrics\CoremetricsLaravel\Commands;
 
+use Coremetrics\CoremetricsLaravel\Agent;
 use Illuminate\Console\Command;
 
 class AgentDaemonCommand extends Command
@@ -21,12 +22,9 @@ class AgentDaemonCommand extends Command
      */
     public function handle()
     {
-        $agent = new Agent();
+        $agent = app()->make('coremetrics.agent');
 
         $agent->listen();
-
-        $this->info('The Coremetrics daemon is listening on ' . $agent->connectionAddress);
-
         $agent->loop();
     }
 }
