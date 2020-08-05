@@ -4,9 +4,10 @@ namespace Coremetrics\CoremetricsLaravel;
 
 use Coremetrics\CoremetricsLaravel\Collector\Collector;
 use Coremetrics\CoremetricsLaravel\Collector\CollectorConnectionManager;
+use Coremetrics\CoremetricsLaravel\Commands\AgentDaemonCommand;
+use Coremetrics\CoremetricsLaravel\Loggers\LaravelLogger;
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\Events\RouteMatched;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Http\Kernel;
 
@@ -23,7 +24,7 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
             return;
         }
 
-        $eventBinder = new EventBinder($this->app);
+        $eventBinder = new EventBinder($this->app, $this->app->make('coremetrics.logger'));
         $eventBinder->bind();
         $eventBinder->booting();
 
@@ -43,17 +44,24 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('coremetrics.connectionManager', static function () {
-            return new CollectorConnectionManager();
+        $this->app->singleton('coremetrics.logger', static function (Application $app) {
+            return new LaravelLogger($app);
+        });
+
+        $this->app->singleton('coremetrics.config', static function () {
+            return new Config();
+        });
+
+        $this->app->singleton('coremetrics.connectionManager', static function (Application $app) {
+            return new CollectorConnectionManager($app->make('coremetrics.config'), $app->make('coremetrics.logger'));
         });
 
         $this->app->singleton('coremetrics.collector', static function (Application $app) {
             return new Collector($app->make('coremetrics.connectionManager'));
         });
 
-
-        $this->app->singleton('coremetrics.agent', static function () {
-            return new Agent();
+        $this->app->singleton('coremetrics.agent', static function (Application $app) {
+            return new Agent($app->make('coremetrics.config'), $app->make('coremetrics.logger'));
         });
 
         $this->app->singleton('coremetrics.agentDaemon', static function () {

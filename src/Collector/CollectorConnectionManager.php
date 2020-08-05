@@ -2,8 +2,9 @@
 
 namespace Coremetrics\CoremetricsLaravel\Collector;
 
-use Exception;
+use Coremetrics\CoremetricsLaravel\Config;
 use Log;
+use Psr\Log\LoggerInterface;
 use Socket\Raw\Factory;
 use Socket\Raw\Socket;
 use Socket\Raw\Exception as SocketException;
@@ -18,16 +19,24 @@ class CollectorConnectionManager
     protected $connection;
 
     /**
-     * @var string
+     * @var Config
      */
-    protected $connectionAddress;
+    protected $config;
 
     /**
-     * @param string $connectionAddress
+     * @var LoggerInterface
      */
-    public function __construct($connectionAddress = '127.0.0.1:8089')
+    protected $logger;
+
+    /**
+     * CollectorConnectionManager constructor.
+     * @param Config $config
+     * @param LoggerInterface $logger
+     */
+    public function __construct(Config $config, LoggerInterface $logger)
     {
-        $this->connectionAddress = $connectionAddress;
+        $this->config = $config;
+        $this->logger = $logger;
     }
 
     /**
@@ -37,10 +46,9 @@ class CollectorConnectionManager
     public function write(string $json)
     {
         $connection = $this->getConnection();
-
-        \Log::info('write');
-
         $connection->write($json . "\n");
+
+        $this->logger->debug('CollectorConnectionManager - write');
     }
 
     /**
@@ -49,6 +57,8 @@ class CollectorConnectionManager
     public function close()
     {
         $this->getConnection()->close();
+
+        $this->logger->debug('CollectorConnectionManager - close');
     }
 
     /**
@@ -63,6 +73,8 @@ class CollectorConnectionManager
         try {
             return $this->createConnection();
         } catch (SocketException $socketException) {
+
+            $this->logger->debug('CollectorConnectionManager - ' . $socketException->getCode());
 
             if ($socketException->getCode() == SOCKET_ECONNREFUSED) {
                 return $this->retryCreateConnection(10);
@@ -79,21 +91,20 @@ class CollectorConnectionManager
      */
     protected function retryCreateConnection($times, $delay = 250): Socket
     {
-        \Log::info('retryCreateConnection - exec ARTISAN');
+        $this->logger->debug('CollectorConnectionManager - launching daemon');
 
-        exec('php ' . base_path() . '/artisan coremetrics:daemon > /dev/null 2>/dev/null &');
-
-        \Log::info('retryCreateConnection - exec');
+        $cmd = $this->config->getAgentDaemonCommandLine();
+        exec($cmd);
 
         try {
             return retry($times, function() {
 
-                \Log::info('retryCreateConnection');
+                $this->logger->debug('CollectorConnectionManager - retryCreateConnection');
 
                 return $this->createConnection();
             }, $delay);
         } catch (Throwable $throwable) {
-            Log::error($throwable);
+            $this->logger->debug('CollectorConnectionManager - createConnection:error' . $throwable->getMessage());
         }
     }
 
@@ -104,6 +115,6 @@ class CollectorConnectionManager
     {
         $factory = new Factory();
 
-        return $this->connection = $factory->createClient($this->connectionAddress);
+        return $this->connection = $factory->createClient($this->config->getAgentLocationUri());
     }
 }

@@ -11,6 +11,19 @@ class Collector
     const PRECISION = 2;
 
     /**
+     * Compression keys
+     */
+    const COMPR_EVENT_TIMESTAMP = 't';
+    const COMPR_TOTAL_DURATION = 's';
+    const COMPR_PROCESS_NAME = 'n';
+    const COMPR_PROCESS_EVENT_BUFFER = 'l';
+    const COMPR_KEY = 'k';
+    const COMPR_VALUE = 'v';
+    const COMPR_DURATION = 'd';
+    const COMPR_META = 'm';
+    const COMPR_META_TAG = 'mt';
+
+    /**
      * @var CollectorConnectionManager
      */
     protected $connectionManager;
@@ -95,7 +108,12 @@ class Collector
 
         $this->totalDuration += ($diff * 1000);
 
-        return ['k' => $key, 'v' => $value, 'm' => $meta, 'd' => round($diff * 1000, self::PRECISION)];
+        return [
+            self::COMPR_KEY => $key,
+            self::COMPR_VALUE => $value,
+            self::COMPR_META => $meta,
+            self::COMPR_DURATION => round($diff * 1000, self::PRECISION)
+        ];
     }
 
     /**
@@ -104,10 +122,10 @@ class Collector
     public function flushBuffer()
     {
         $json = json_encode([
-            't' => round(LARAVEL_START * 1000),
-            's' => round($this->totalDuration, self::PRECISION),
-            'n' => $this->processName,
-            'l' => $this->buffer
+            self::COMPR_EVENT_TIMESTAMP => round(LARAVEL_START * 1000),
+            self::COMPR_TOTAL_DURATION => round($this->totalDuration, self::PRECISION),
+            self::COMPR_PROCESS_NAME => $this->processName,
+            self::COMPR_PROCESS_EVENT_BUFFER => $this->buffer
         ]);
 
         $this->buffer = [];
