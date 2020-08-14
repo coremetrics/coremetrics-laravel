@@ -18,6 +18,7 @@ use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Routing\Events\RouteMatched;
 use Psr\Log\LoggerInterface;
 use Illuminate\Support\Str;
+use Illuminate\Redis\Events\CommandExecuted;
 
 class EventBinder
 {
@@ -120,6 +121,13 @@ class EventBinder
             $this->logger->debug('EventBinder - QUERY');
         });
 
+        $this->app['events']->listen(CommandExecuted::class, function (CommandExecuted $event) {
+            $this->app['coremetrics.collector']->append($event->command, round($event->time, Collector::PRECISION), [
+                    Collector::COMPR_META_TAG => TagCollection::REDIS_COMMAND]
+            );
+            $this->logger->debug('EventBinder - REDIS_COMMAND');
+        });
+
         $this->app['events']->listen(MessageLogged::class, function (MessageLogged $event) {
 
             if (Str::startsWith($event->message, 'COREMETRICS ->')) {
@@ -129,7 +137,7 @@ class EventBinder
             $this->app['coremetrics.collector']->append($event->level, null, [
                 Collector::COMPR_META_TAG => TagCollection::MSG_LOGGED
             ]);
-            
+
             // we don't debug MSG_LOGGED to avoid circular calls with the laravel logger
             // $this->logger->debug('EventBinder - MSG_LOGGED');
         });
