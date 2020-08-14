@@ -19,5 +19,5 @@ class TagCollection
     const MSG_LOGGED = 13;
     const MIDDLEWARE_START = 14;
     const MIDDLEWARE_END = 15;
-
+    const REDIS_COMMAND = 16;
 }
