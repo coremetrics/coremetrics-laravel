@@ -66,14 +66,14 @@ class EventBinder
     public function bind()
     {
         $this->app['events']->listen(MessageSending::class, function (MessageSending $event) {
-            $this->app['coremetrics.collector']->append($event->key, null, [
+            $this->app['coremetrics.collector']->append(null, null, [
                 Collector::COMPR_META_TAG => TagCollection::MAIL_SENDING
             ]);
             $this->logger->debug('EventBinder - MAIL_SENDING');
         });
 
         $this->app['events']->listen(MessageSent::class, function (MessageSent $event) {
-            $this->app['coremetrics.collector']->append($event->key, null, [
+            $this->app['coremetrics.collector']->append(null, null, [
                 Collector::COMPR_META_TAG => TagCollection::MAIL_SENT
             ]);
             $this->logger->debug('EventBinder - MAIL_SENT');
