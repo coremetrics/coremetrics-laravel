@@ -12,6 +12,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.0",
+        "ext-json": "*",
         "illuminate/support": "~5.0|~6.0|~7.0",
         "clue/socket-raw": "^1.4",
         "react/event-loop": "^1.1",
