@@ -144,7 +144,7 @@ class EventBinder
 
         $this->app['events']->listen(RequestHandled::class, function (RequestHandled $event) {
             $route = $event->request->route();
-            $name = empty($route) ?: $route->getActionName();
+            $name = empty($route) ? null : $route->getActionName();
 
             if ($name === 'Closure' || empty($name)) {
                 $name = $event->request->method() . '@' . ($route ? $route->uri() : $event->request->path());
@@ -155,14 +155,17 @@ class EventBinder
                 Collector::COMPR_META_TAG => TagCollection::REQUEST_HANDLED
             ]);
 
-            $this->logger->debug('EventBinder - REQUEST_HANDLED');
+            $this->logger->debug('EventBinder - REQUEST_HANDLED', ['name' => $name]);
         });
 
         $this->app['events']->listen(RouteMatched::class, function (RouteMatched $event) {
             $this->app['coremetrics.collector']->append(null, null, [
                 Collector::COMPR_META_TAG => TagCollection::REQUEST_ROUTE_MATCHED
             ]);
-            $this->logger->debug('EventBinder - REQUEST_ROUTE_MATCHED');
+            // TODO(david): it seems like it might be a good idea to try and set the process name here if we are looking to capture
+            // the route name at any time. Otherwise, using RequestHandled, we seem to only be able to generate
+            // the controller type thing. Unclear atm.
+            $this->logger->debug('EventBinder - REQUEST_ROUTE_MATCHED', ['route' => $event->route->action]);
         });
 
         $this->app->terminating(function () {

@@ -113,6 +113,8 @@ class Collector
             self::COMPR_VALUE => $value,
             self::COMPR_META => $meta,
             self::COMPR_DURATION => round($diff * 1000, self::PRECISION)
+            // TODO(david): do we want to set the duration like this?
+            //  It seems like it might be nicer to send up the actual microtime and we can handle that on the server as we want?
         ];
     }
 
