@@ -13,7 +13,7 @@ class AgentDaemonCommand extends Command
      *
      * @var string
      */
-    protected $name = 'coremetrics:daemon';
+    protected $name = 'cm:daemon:start';
 
     /**
      * Execute the console command.
