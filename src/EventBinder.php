@@ -3,7 +3,7 @@
 namespace Coremetrics\CoremetricsLaravel;
 
 use Coremetrics\CoremetricsLaravel\Collector\Collector;
-use Illuminate\Foundation\Application;
+use \Illuminate\Contracts\Foundation\Application;
 
 use Illuminate\Cache\Events\CacheHit;
 use Illuminate\Cache\Events\CacheMissed;
@@ -153,7 +153,7 @@ class EventBinder
                     $event->connectionName,
                     null,
                     [
-                        Collector::COMPR_META_TAG => TagCollection::TRANSACTION_COMMITED
+                        Collector::COMPR_META_TAG => TagCollection::TRANSACTION_COMMITTED
                     ]
                 );
                 $this->logger->debug('EventBinder - TRANSACTION_COMMITTED');
@@ -255,9 +255,10 @@ class EventBinder
                 // Generate and set the route information.
                 $this->app['coremetrics.collector']->setRouteInformation(
                     [
-                        'name' => empty($route) ? null : $route->getName(),
-                        'uri' => empty($route) ? null : $route->uri(),
-                        'action' => empty($route) ? null : $route->getActionName(),
+                        Collector::COMPR_ROUTE_URI => empty($route) ? $event->request->path() : $route->uri(),
+                        Collector::COMPR_ROUTE_METHOD => $event->request->method(),
+                        Collector::COMPR_ROUTE_NAME => empty($route) ? null : $route->getName(),
+                        Collector::COMPR_ROUTE_ACTION => empty($route) ? null : $route->getActionName(),
                     ]
                 );
 
@@ -295,7 +296,10 @@ class EventBinder
         $this->app->terminating(
             function ()
             {
-                $this->app['coremetrics.collector']->append(
+                /** @var Collector $collector */
+                $collector = $this->app['coremetrics.collector'];
+
+                $collector->append(
                     null,
                     null,
                     [
@@ -303,7 +307,13 @@ class EventBinder
                     ]
                 );
 
-                $this->app['coremetrics.collector']->flushBuffer();
+                $collector->setPeakMemoryUsage([
+                    'usage' => memory_get_peak_usage(),
+                    'real_usage' => memory_get_peak_usage(true),
+                ]);
+
+                $collector->flushBuffer();
+
                 $this->app['coremetrics.connectionManager']->close();
 
                 $this->logger->debug('EventBinder - APP_TERMINATING');

@@ -1,6 +1,7 @@
 # coremetrics-laravel
 
 Installation (Host app):
+
 ```
 "require": {
         "coremetrics/coremetrics-laravel": "@dev",
@@ -17,13 +18,14 @@ Installation (Host app):
         }
     ]
  ```
- 
- Daemon (Host app):
+
+Daemon (Host app):
+
  ```
  php artisan coremetrics:daemon
  ```
- * This later will be removed as a step 
- 
- 
+
+* This later will be removed as a step
+
 Data will be sent to the following hard-coded endpoint:
 https://github.com/coremetrics/coremetrics-laravel/blob/master/src/Agent.php#L83

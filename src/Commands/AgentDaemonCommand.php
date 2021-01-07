@@ -7,7 +7,6 @@ use Illuminate\Console\Command;
 
 class AgentDaemonCommand extends Command
 {
-
     /**
      * The console command name.
      *
@@ -22,6 +21,7 @@ class AgentDaemonCommand extends Command
      */
     public function handle()
     {
+        /** @var Agent $agent */
         $agent = app()->make('coremetrics.agent');
 
         $agent->listen();
