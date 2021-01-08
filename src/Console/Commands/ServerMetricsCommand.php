@@ -1,6 +1,6 @@
 <?php
 
-namespace Coremetrics\CoremetricsLaravel\Commands;
+namespace Coremetrics\CoremetricsLaravel\Console\Commands;
 
 use Coremetrics\CoremetricsLaravel\Metrics\Cpu;
 use Coremetrics\CoremetricsLaravel\Metrics\Disk;
@@ -9,18 +9,8 @@ use Illuminate\Console\Command;
 
 class ServerMetricsCommand extends Command
 {
-    /**
-     * The console command name.
-     *
-     * @var string
-     */
     protected $name = 'cm:metrics:report';
 
-    /**
-     * Execute the console command.
-     *
-     * @return void
-     */
     public function handle()
     {
         $data = $this->executeChecks();
