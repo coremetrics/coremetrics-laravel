@@ -40,10 +40,3 @@ in order to be able to stop it. If you don't, it will keep running and fill up l
  ```
  php artisan cm:daemon:start
  ```
-
-### Date Endpoint
-The data endpoint is currently hard-coded and can be seen in the following place:
-
-```
-src/Config.php:35
-```
