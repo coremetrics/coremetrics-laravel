@@ -27,7 +27,10 @@ php artisan vendor:publish --provider="Coremetrics\CoremetricsLaravel\Coremetric
 ```
 
 ## Add Token
-You must add a channel token from the Coremetrics server to the `.env` file under the key `COREMETRICS_CHANNEL_TOKEN`. This will be a UUID.
+You must add a channel token from the Coremetrics server to the `.env` file under the key `COREMETRICS_TOKEN`. This will be a UUID.
+
+## Server Endpoint
+You must set a server endpoint in the `.env` file under the key `COREMETRICS_URL`.
 
 ## Daemon:
 If the command isn't running then the agent will be started automatically. There is currently no mechanism to turn off 
