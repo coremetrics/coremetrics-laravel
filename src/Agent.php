@@ -102,15 +102,18 @@ class Agent
 
         $requestBody = json_encode($data);
 
+        $serverUrl = $this->config->getRemoteApiUrl();
+
         $this->logger->debug(
             'Agent - postData',
             [
                 'item_count' => count($buffer),
                 'size' => strlen($requestBody),
+                'url' => $serverUrl,
             ]
         );
 
-        $ch = curl_init($this->config->getRemoteApiUrl());
+        $ch = curl_init($serverUrl);
 
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);

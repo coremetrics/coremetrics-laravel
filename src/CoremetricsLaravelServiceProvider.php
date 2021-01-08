@@ -4,8 +4,9 @@ namespace Coremetrics\CoremetricsLaravel;
 
 use Coremetrics\CoremetricsLaravel\Collector\Collector;
 use Coremetrics\CoremetricsLaravel\Collector\CollectorConnectionManager;
-use Coremetrics\CoremetricsLaravel\Commands\AgentDaemonCommand;
+use Coremetrics\CoremetricsLaravel\Console\Commands\AgentDaemonCommand;
 use Coremetrics\CoremetricsLaravel\Loggers\LaravelLogger;
+use Coremetrics\CoremetricsLaravel\Providers\ScheduleServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
@@ -21,6 +22,10 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
     public function boot()
     {
         if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../config/config.php' => config_path('coremetrics.php'),
+            ], 'config');
+
             return;
         }
 
@@ -46,13 +51,21 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(
-            'coremetrics.logger',
-            static function (Application $app)
-            {
-                return new LaravelLogger($app);
-            }
-        );
+        $this->registerConfiguration();
+        $this->registerApplicationMonitoringAgent();
+        $this->registerServerMonitoringAgent();
+    }
+
+    private function registerConfiguration()
+    {
+        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'coremetrics');
+    }
+
+    private function registerApplicationMonitoringAgent()
+    {
+        $this->app->singleton('coremetrics.logger', static function (Application $app) {
+            return new LaravelLogger($app);
+        });
 
         $this->app->singleton(
             'coremetrics.config',
@@ -97,5 +110,10 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
         );
 
         $this->commands(['coremetrics.agentDaemon']);
+    }
+
+    private function registerServerMonitoringAgent()
+    {
+        $this->app->register(ScheduleServiceProvider::class);
     }
 }
