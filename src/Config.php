@@ -22,7 +22,9 @@ class Config
     {
         $channelToken = config('coremetrics.channel-token', 'invalid-channel-token');
 
-        return "http://coremetrics-server.test/api/metrics/{$channelToken}/application";
+        $baseUrl = config('coremetrics.server.base_url');
+
+        return "{$baseUrl}/api/metrics/{$channelToken}/application";
     }
 
     public function getAgentTimerSeconds(): int
