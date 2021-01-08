@@ -104,17 +104,17 @@ class Collector
      */
     public function flushBuffer()
     {
-        $json = json_encode(
-            [
-                self::COMPR_EVENT_TIMESTAMP => round(LARAVEL_START * 1000),
-                self::COMPR_TOTAL_DURATION => round($this->totalDuration, self::PRECISION),
-                self::COMPR_PROCESS_NAME => $this->processName,
-                self::COMPR_ROUTE_INFORMATION => $this->routeInformation,
-                self::COMPR_MEMORY_USAGE => $this->peakMemoryUsage['usage'],
-                self::COMPR_MEMORY_USAGE_REAL => $this->peakMemoryUsage['real_usage'],
-                self::COMPR_PROCESS_EVENT_BUFFER => $this->buffer,
-            ]
-        );
+        $data = [
+            self::COMPR_EVENT_TIMESTAMP => round(LARAVEL_START * 1000),
+            self::COMPR_TOTAL_DURATION => round($this->totalDuration, self::PRECISION),
+            self::COMPR_PROCESS_NAME => $this->processName,
+            self::COMPR_ROUTE_INFORMATION => $this->routeInformation,
+            self::COMPR_MEMORY_USAGE => $this->peakMemoryUsage['usage'],
+            self::COMPR_MEMORY_USAGE_REAL => $this->peakMemoryUsage['real_usage'],
+            self::COMPR_PROCESS_EVENT_BUFFER => $this->buffer,
+        ];
+
+        $json = json_encode($data);
 
         $this->buffer = [];
 

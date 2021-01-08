@@ -123,7 +123,10 @@ class Agent
             CURLOPT_HTTPHEADER,
             [
                 'Content-Type: application/json',
-                'Content-Length: ' . strlen($requestBody)
+                'Content-Length: ' . strlen($requestBody),
+                // NOTE(david): VERY IMPORTANT! The server needs to know what version the payload is to correctly
+                // interpret it, as we are likely to change it in the future.
+                'X-Coremetrics-Payload-Version: ' . Config::PAYLOAD_VERSION,
             ]
         );
 

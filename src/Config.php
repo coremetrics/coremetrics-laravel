@@ -4,6 +4,8 @@ namespace Coremetrics\CoremetricsLaravel;
 
 class Config
 {
+    const PAYLOAD_VERSION = '0.0.1';
+
     public function getAgentServerUri(): string
     {
         // https://reactphp.org/socket/#server
