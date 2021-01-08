@@ -12,7 +12,7 @@ class Cpu extends BaseMetric
 
         // processors
         // $process = Process::fromShellCommandline("cat /proc/cpuinfo | grep processor | wc -l");
-        $cores = $this->executeProcess("nproc");
+        $cores = $this->executeProcess('nproc');
 
         return [
             '1m' => $load[0],

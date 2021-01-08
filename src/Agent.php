@@ -132,10 +132,15 @@ class Agent
 
         $result = curl_exec($ch);
 
+        $errors = curl_error($ch);
+        $response = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
         $this->logger->debug(
             'Agent - postData response',
             [
                 'response' => $result,
+                'errors' => $errors,
+                'response_detail' => $response,
             ]
         );
     }

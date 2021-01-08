@@ -5,6 +5,7 @@ namespace Coremetrics\CoremetricsLaravel;
 use Coremetrics\CoremetricsLaravel\Collector\Collector;
 use Coremetrics\CoremetricsLaravel\Collector\CollectorConnectionManager;
 use Coremetrics\CoremetricsLaravel\Console\Commands\AgentDaemonCommand;
+use Coremetrics\CoremetricsLaravel\Console\Commands\ServerMetricsCommand;
 use Coremetrics\CoremetricsLaravel\Loggers\LaravelLogger;
 use Coremetrics\CoremetricsLaravel\Providers\ScheduleServiceProvider;
 use Illuminate\Foundation\Application;
@@ -109,7 +110,7 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
             }
         );
 
-        $this->commands(['coremetrics.agentDaemon']);
+        $this->commands(['coremetrics.agentDaemon', ServerMetricsCommand::class]);
     }
 
     private function registerServerMonitoringAgent()
