@@ -111,7 +111,7 @@ class Collector
                 self::COMPR_PROCESS_NAME => $this->processName,
                 self::COMPR_ROUTE_INFORMATION => $this->routeInformation,
                 self::COMPR_MEMORY_USAGE => $this->peakMemoryUsage['usage'],
-                self::COMPR_MEMORY_USAGE_REAL => $this->peakMemoryUsage['real'],
+                self::COMPR_MEMORY_USAGE_REAL => $this->peakMemoryUsage['real_usage'],
                 self::COMPR_PROCESS_EVENT_BUFFER => $this->buffer,
             ]
         );
