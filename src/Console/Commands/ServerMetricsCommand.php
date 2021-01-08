@@ -45,7 +45,10 @@ class ServerMetricsCommand extends Command
 
     private function getPostUrl(): string
     {
-        return config('coremetrics.url') . config('coremetrics.token');
+        $baseUrl = config('coremetrics.server.base_url');
+        $token = config('coremetrics.token');
+
+        return "{$baseUrl}/api/{$token}/server";
     }
 
     private function executeChecks(): array

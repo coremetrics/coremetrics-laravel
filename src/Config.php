@@ -22,7 +22,7 @@ class Config
 
     public function getRemoteApiUrl(): string
     {
-        $channelToken = config('coremetrics.channel-token', 'invalid-channel-token');
+        $channelToken = config('coremetrics.token', 'invalid-channel-token');
 
         $baseUrl = config('coremetrics.server.base_url');
 
