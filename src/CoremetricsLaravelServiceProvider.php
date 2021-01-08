@@ -22,6 +22,10 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
     public function boot()
     {
         if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../config/config.php' => config_path('coremetrics.php'),
+            ], 'config');
+
             return;
         }
 
@@ -42,6 +46,18 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
      * @return void
      */
     public function register()
+    {
+        $this->registerConfiguration();
+        $this->registerApplicationMonitoringAgent();
+        $this->registerServerMonitoringAgent();
+    }
+
+    private function registerConfiguration()
+    {
+        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'coremetrics');
+    }
+
+    private function registerApplicationMonitoringAgent()
     {
         $this->app->singleton('coremetrics.logger', static function (Application $app) {
             return new LaravelLogger($app);
@@ -67,8 +83,11 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
             return new AgentDaemonCommand();
         });
 
-        $this->app->register(ScheduleServiceProvider::class);
-
         $this->commands(['coremetrics.agentDaemon']);
+    }
+
+    private function registerServerMonitoringAgent()
+    {
+        $this->app->register(ScheduleServiceProvider::class);
     }
 }

@@ -21,6 +21,7 @@
     "require": {
         "php": ">=7.0",
         "ext-sockets": "*",
+        "ext-curl": "*",
         "ext-json": "*",
         "illuminate/support": "~5.0 || ~6.0 || ~7.0 || ~8.0",
         "clue/socket-raw": "^1.4",

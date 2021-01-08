@@ -9,7 +9,6 @@ use React\Socket\Server;
 
 class Agent
 {
-
     /**
      * @var Server
      */
@@ -53,32 +52,57 @@ class Agent
      */
     public function listen()
     {
-        $this->socket->on('connection', function (ConnectionInterface $connection) {
-            $connection->on('data', function ($data) use ($connection) {
-                $this->buffer[] = json_decode($data, true);
-                $this->logger->debug('Agent received data', [
-                    'data' =>$data
-                ]);
-            });
+        $this->socket->on(
+            'connection',
+            function (ConnectionInterface $connection)
+            {
+                $connection->on(
+                    'data',
+                    function ($data) use ($connection)
+                    {
+                        $this->buffer[] = json_decode($data, true);
+                        $this->logger->debug(
+                            'Agent received data',
+                            [
+                                'data' => $data
+                            ]
+                        );
+                    }
+                );
 
-            $this->logger->info('The Coremetrics daemon is listening on ' . $this->config->getAgentServerUri());
-        });
+                $this->logger->info('The Coremetrics daemon is listening on ' . $this->config->getAgentServerUri());
+            }
+        );
 
         $total = microtime(true);
 
-        $this->loop->addPeriodicTimer($this->config->getAgentTimerSeconds(), function () use($total) {
+        $this->loop->addPeriodicTimer(
+            $this->config->getAgentTimerSeconds(),
+            function () use ($total)
+            {
+                $this->logger->debug(
+                    'Agent - addPeriodicTimer',
+                    [
+                        'total_agent_lifetime' => (microtime(true) - $total)
+                    ]
+                );
 
-            $this->logger->debug('Agent - addPeriodicTimer', [
-                'total_agent_lifetime' => (microtime(true) - $total)
-            ]);
+                $buffer = $this->buffer;
+                $this->buffer = [];
 
-            $buffer = $this->buffer;
-            $this->buffer = [];
-
-            if ($buffer) {
-                $this->postData($buffer);
+                if ($buffer) {
+                    $this->postData($buffer);
+                }
             }
-        });
+        );
+    }
+
+    /**
+     * @return void
+     */
+    public function loop()
+    {
+        $this->loop->run();
     }
 
     /**
@@ -92,32 +116,38 @@ class Agent
 
         $requestBody = json_encode($data);
 
-        $this->logger->debug('Agent - postData', [
-            'item_count' => count($buffer),
-            'size' => strlen($requestBody),
-        ]);
+        $serverUrl = $this->config->getRemoteApiUrl();
 
-        $ch = curl_init($this->config->getRemoteApiUrl());
+        $this->logger->debug(
+            'Agent - postData',
+            [
+                'item_count' => count($buffer),
+                'size' => strlen($requestBody),
+                'url' => $serverUrl,
+            ]
+        );
+
+        $ch = curl_init($serverUrl);
+
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Content-Length: ' . strlen($requestBody)
-        ]);
+        curl_setopt(
+            $ch,
+            CURLOPT_HTTPHEADER,
+            [
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($requestBody)
+            ]
+        );
 
         $result = curl_exec($ch);
 
-        $this->logger->debug('Agent - postData response', [
-            'response' => $result,
-        ]);
-    }
-
-    /**
-     * @return void
-     */
-    public function loop()
-    {
-        $this->loop->run();
+        $this->logger->debug(
+            'Agent - postData response',
+            [
+                'response' => $result,
+            ]
+        );
     }
 }
