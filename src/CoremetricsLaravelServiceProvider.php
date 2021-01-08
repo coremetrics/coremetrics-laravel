@@ -4,8 +4,9 @@ namespace Coremetrics\CoremetricsLaravel;
 
 use Coremetrics\CoremetricsLaravel\Collector\Collector;
 use Coremetrics\CoremetricsLaravel\Collector\CollectorConnectionManager;
-use Coremetrics\CoremetricsLaravel\Commands\AgentDaemonCommand;
+use Coremetrics\CoremetricsLaravel\Console\Commands\AgentDaemonCommand;
 use Coremetrics\CoremetricsLaravel\Loggers\LaravelLogger;
+use Coremetrics\CoremetricsLaravel\Providers\ScheduleServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\ServiceProvider;
@@ -28,9 +29,7 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
         $eventBinder->bind();
         $eventBinder->booting();
 
-        /**
-         * @var $httpKernel Kernel
-         */
+        /** @var $httpKernel Kernel */
         $httpKernel = $this->app->make(Kernel::class);
         $httpKernel->prependMiddleware(AppMiddleware::class);
 
@@ -67,6 +66,8 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
         $this->app->singleton('coremetrics.agentDaemon', static function () {
             return new AgentDaemonCommand();
         });
+
+        $this->app->register(ScheduleServiceProvider::class);
 
         $this->commands(['coremetrics.agentDaemon']);
     }

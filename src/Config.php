@@ -30,7 +30,7 @@ class Config
      */
     public function getRemoteApiUrl(): string
     {
-        return 'http://coremetrics.test/input';
+        return 'http://coremetrics-server.test/metrics/c74e87e4-3633-404c-9199-553f18192c6a/application';
     }
 
     /**
@@ -46,6 +46,6 @@ class Config
      */
     public function getAgentDaemonCommandLine(): string
     {
-        return 'php ' . base_path() . '/artisan coremetrics:daemon > /dev/null 2>/dev/null &';
+        return 'php ' . base_path() . '/artisan cm:daemon:start > /dev/null 2>/dev/null &';
     }
 }
