@@ -9,35 +9,21 @@ use React\Socket\Server;
 
 class Agent
 {
-    /**
-     * @var Server
-     */
-    protected $socket;
+    /** @var Server */
+    private $socket;
 
-    /**
-     * @var Factory
-     */
-    protected $loop;
+    /** @var Factory */
+    private $loop;
 
-    /**
-     * @var array
-     */
-    protected $buffer = [];
+    /** @var array */
+    private $buffer = [];
 
-    /**
-     * @var Config
-     */
-    protected $config;
+    /** @var Config */
+    private $config;
 
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    /** @var LoggerInterface */
+    private $logger;
 
-    /**
-     * @param Config $config
-     * @param LoggerInterface $logger
-     */
     public function __construct(Config $config, LoggerInterface $logger)
     {
         $this->config = $config;
@@ -58,7 +44,7 @@ class Agent
             {
                 $connection->on(
                     'data',
-                    function ($data) use ($connection)
+                    function ($data)
                     {
                         $this->buffer[] = json_decode($data, true);
                         $this->logger->debug(
@@ -106,9 +92,9 @@ class Agent
     }
 
     /**
-     * @param $buffer
+     * @return void
      */
-    protected function postData($buffer)
+    private function postData(array $buffer)
     {
         $data = [
             'data' => $buffer

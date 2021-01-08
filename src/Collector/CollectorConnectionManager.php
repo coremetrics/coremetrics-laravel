@@ -3,7 +3,6 @@
 namespace Coremetrics\CoremetricsLaravel\Collector;
 
 use Coremetrics\CoremetricsLaravel\Config;
-use Log;
 use Psr\Log\LoggerInterface;
 use Socket\Raw\Factory;
 use Socket\Raw\Socket;
@@ -12,27 +11,15 @@ use Throwable;
 
 class CollectorConnectionManager
 {
-
-    /**
-     * @var Socket
-     */
+    /** @var Socket */
     protected $connection;
 
-    /**
-     * @var Config
-     */
+    /** @var Config */
     protected $config;
 
-    /**
-     * @var LoggerInterface
-     */
+    /** @var LoggerInterface */
     protected $logger;
 
-    /**
-     * CollectorConnectionManager constructor.
-     * @param Config $config
-     * @param LoggerInterface $logger
-     */
     public function __construct(Config $config, LoggerInterface $logger)
     {
         $this->config = $config;
@@ -40,8 +27,7 @@ class CollectorConnectionManager
     }
 
     /**
-     * @param string $json
-     * @return int
+     * @return void
      */
     public function write(string $json)
     {
@@ -73,23 +59,17 @@ class CollectorConnectionManager
         try {
             return $this->createConnection();
         } catch (SocketException $socketException) {
-
             $this->logger->debug('CollectorConnectionManager - ' . $socketException->getCode());
 
             if ($socketException->getCode() == SOCKET_ECONNREFUSED) {
                 return $this->retryCreateConnection(10);
-            } else {
-                return $this->retryCreateConnection(3);
             }
+
+            return $this->retryCreateConnection(3);
         }
     }
 
-    /**
-     * @param $times
-     * @param int $delay
-     * @return Socket
-     */
-    protected function retryCreateConnection($times, $delay = 250): Socket
+    protected function retryCreateConnection(int $times, int $delay = 250): Socket
     {
         $this->logger->debug('CollectorConnectionManager - launching daemon');
 
@@ -97,15 +77,23 @@ class CollectorConnectionManager
         exec($cmd);
 
         try {
-            return retry($times, function() {
+            return retry(
+                $times,
+                function ()
+                {
+                    $this->logger->debug('CollectorConnectionManager - retryCreateConnection');
 
-                $this->logger->debug('CollectorConnectionManager - retryCreateConnection');
-
-                return $this->createConnection();
-            }, $delay);
+                    return $this->createConnection();
+                },
+                $delay
+            );
         } catch (Throwable $throwable) {
             $this->logger->debug('CollectorConnectionManager - createConnection:error' . $throwable->getMessage());
         }
+
+        // TODO(david): we're making an assumption here that the retry works, and we don't return anything
+        //  if it doesn't. Given the typing, I'm fairly certain that means we just crash, which doesn't
+        //  feel very robust. Probably want to look into shoring up this code a bit.
     }
 
     /**

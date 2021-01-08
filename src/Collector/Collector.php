@@ -11,13 +11,19 @@ class Collector
     const COMPR_EVENT_TIMESTAMP = 't';
     const COMPR_TOTAL_DURATION = 's';
     const COMPR_PROCESS_NAME = 'n';
-    const COMPR_ROUTE_INFORMATION = 'ri';
     const COMPR_PROCESS_EVENT_BUFFER = 'l';
     const COMPR_KEY = 'k';
     const COMPR_VALUE = 'v';
     const COMPR_DURATION = 'd';
     const COMPR_META = 'm';
     const COMPR_META_TAG = 'mt';
+    const COMPR_MEMORY_USAGE = 'meu';
+    const COMPR_MEMORY_USAGE_REAL = 'mer';
+    const COMPR_ROUTE_INFORMATION = 'ri';
+    const COMPR_ROUTE_NAME = 'rin';
+    const COMPR_ROUTE_URI = 'riu';
+    const COMPR_ROUTE_ACTION = 'ria';
+    const COMPR_ROUTE_METHOD = 'rim';
 
     /** @var CollectorConnectionManager */
     private $connectionManager;
@@ -37,19 +43,36 @@ class Collector
     /** @var array|null */
     private $routeInformation;
 
+    /** @var array */
+    private $peakMemoryUsage;
+
     public function __construct(CollectorConnectionManager $connectionManager)
     {
         $this->connectionManager = $connectionManager;
     }
 
+    /**
+     * @return void
+     */
     public function setProcessName(string $processName)
     {
         $this->processName = $processName;
     }
 
+    /**
+     * @return void
+     */
     public function setRouteInformation(array $routeInformation)
     {
         $this->routeInformation = $routeInformation;
+    }
+
+    /**
+     * @return void
+     */
+    public function setPeakMemoryUsage(array $peakMemoryUsage)
+    {
+        $this->peakMemoryUsage = $peakMemoryUsage;
     }
 
     /**
@@ -81,13 +104,17 @@ class Collector
      */
     public function flushBuffer()
     {
-        $json = json_encode([
-            self::COMPR_EVENT_TIMESTAMP => round(LARAVEL_START * 1000),
-            self::COMPR_TOTAL_DURATION => round($this->totalDuration, self::PRECISION),
-            self::COMPR_PROCESS_NAME => $this->processName,
-            self::COMPR_ROUTE_INFORMATION => $this->routeInformation,
-            self::COMPR_PROCESS_EVENT_BUFFER => $this->buffer
-        ]);
+        $json = json_encode(
+            [
+                self::COMPR_EVENT_TIMESTAMP => round(LARAVEL_START * 1000),
+                self::COMPR_TOTAL_DURATION => round($this->totalDuration, self::PRECISION),
+                self::COMPR_PROCESS_NAME => $this->processName,
+                self::COMPR_ROUTE_INFORMATION => $this->routeInformation,
+                self::COMPR_MEMORY_USAGE => $this->peakMemoryUsage['usage'],
+                self::COMPR_MEMORY_USAGE_REAL => $this->peakMemoryUsage['real'],
+                self::COMPR_PROCESS_EVENT_BUFFER => $this->buffer,
+            ]
+        );
 
         $this->buffer = [];
 
@@ -100,15 +127,21 @@ class Collector
      * @param array $meta
      * @param float|null $now
      * @param float|null $lastMicrotime
+     *
      * @return array
      */
-    private function format(string $key = null, $value = null, array $meta = [], float $now = null, float $lastMicrotime = null): array
-    {
-        if (!$now) {
+    private function format(
+        string $key = null,
+        $value = null,
+        array $meta = [],
+        float $now = null,
+        float $lastMicrotime = null
+    ): array {
+        if ( ! $now) {
             $now = microtime(true);
         }
 
-        if (!$lastMicrotime) {
+        if ( ! $lastMicrotime) {
             $lastMicrotime = $this->lastMicrotime;
         }
 

@@ -20,19 +20,25 @@ class ServerMetricsCommand extends Command
 
     private function transmitData($data)
     {
-        $requestBody = json_encode([
-            'payload' => $data,
-            'timestamp' => time(),
-        ]);
+        $requestBody = json_encode(
+            [
+                'payload' => $data,
+                'timestamp' => time(),
+            ]
+        );
 
         $ch = curl_init($this->getPostUrl());
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Content-Length: ' . strlen($requestBody)
-        ]);
+        curl_setopt(
+            $ch,
+            CURLOPT_HTTPHEADER,
+            [
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($requestBody)
+            ]
+        );
 
         $result = curl_exec($ch);
     }

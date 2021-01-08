@@ -10,6 +10,7 @@ class AgentDaemonCommand extends Command
 
     public function handle()
     {
+        /** @var Agent $agent */
         $agent = app()->make('coremetrics.agent');
 
         $agent->listen();
