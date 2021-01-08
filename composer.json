@@ -1,17 +1,27 @@
 {
     "name": "coremetrics/coremetrics-laravel",
+    "description": "Coremetrics server and application monitoring.",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
             "name": "Aivis Silins",
             "email": "aivis.silins@gmail.com"
+        },
+        {
+            "name": "David Field",
+            "email": "david@mettle.io"
+        },
+        {
+            "name": "Jon Behr",
+            "email": "jon@mettle.io"
         }
     ],
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.0",
-        "illuminate/support": "~5.0|~6.0|~7.0",
+        "ext-sockets": "*",
+        "illuminate/support": "~5.0 || ~6.0 || ~7.0 || ~8.0",
         "clue/socket-raw": "^1.4",
         "react/event-loop": "^1.1",
         "react/socket": "^1.2"
