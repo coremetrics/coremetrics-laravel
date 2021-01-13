@@ -312,6 +312,11 @@ class EventBinder
                     'real_usage' => memory_get_peak_usage(true),
                 ]);
 
+                if(config('coremetrics.allow-git')) {
+                    $gitCommitSha = exec('git rev-parse --short HEAD');
+                    $collector->setGitCommitSha($gitCommitSha);
+                }
+
                 $collector->flushBuffer();
 
                 $this->app['coremetrics.connectionManager']->close();

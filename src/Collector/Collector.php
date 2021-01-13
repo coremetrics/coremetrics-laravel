@@ -24,6 +24,7 @@ class Collector
     const COMPR_ROUTE_URI = 'riu';
     const COMPR_ROUTE_ACTION = 'ria';
     const COMPR_ROUTE_METHOD = 'rim';
+    const COMPR_GIT_COMMIT_SHA = 'gcs';
 
     /** @var CollectorConnectionManager */
     private $connectionManager;
@@ -45,6 +46,9 @@ class Collector
 
     /** @var array */
     private $peakMemoryUsage;
+
+    /** @var string|null */
+    private $gitCommitSha = null;
 
     public function __construct(CollectorConnectionManager $connectionManager)
     {
@@ -73,6 +77,14 @@ class Collector
     public function setPeakMemoryUsage(array $peakMemoryUsage)
     {
         $this->peakMemoryUsage = $peakMemoryUsage;
+    }
+
+    /**
+     * @param string $gitCommitSha
+     */
+    public function setGitCommitSha(string $gitCommitSha)
+    {
+        $this->gitCommitSha = $gitCommitSha;
     }
 
     /**
@@ -112,6 +124,7 @@ class Collector
             self::COMPR_MEMORY_USAGE => $this->peakMemoryUsage['usage'],
             self::COMPR_MEMORY_USAGE_REAL => $this->peakMemoryUsage['real_usage'],
             self::COMPR_PROCESS_EVENT_BUFFER => $this->buffer,
+            self::COMPR_GIT_COMMIT_SHA => $this->gitCommitSha,
         ];
 
         $json = json_encode($data);
