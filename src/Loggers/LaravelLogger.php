@@ -149,7 +149,6 @@ class LaravelLogger implements LoggerInterface
      */
     public function log($level, $message, array $context = [])
     {
-        // JB 2021-05-20 Disabled logging
-        // $this->laravelLogger->log($level, 'COREMETRICS -> ' . $message, $context);
+        $this->laravelLogger->log($level, 'COREMETRICS -> ' . $message, $context);
     }
 }

@@ -56,7 +56,7 @@ class Agent
                     }
                 );
 
-                $this->logger->info('The Coremetrics daemon is listening on ' . $this->config->getAgentServerUri());
+                $this->logger->debug('The Coremetrics daemon is listening on ' . $this->config->getAgentServerUri());
             }
         );
 
