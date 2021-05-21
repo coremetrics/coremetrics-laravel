@@ -5,10 +5,6 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Aivis Silins",
-            "email": "aivis.silins@gmail.com"
-        },
-        {
             "name": "David Field",
             "email": "david@mettle.io"
         },
@@ -41,7 +37,7 @@
     "extra": {
         "component": "package",
         "frameworks": [
-            "Laravel 5"
+            "Laravel"
         ],
         "laravel": {
             "providers": [

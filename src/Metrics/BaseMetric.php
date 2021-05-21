@@ -12,7 +12,7 @@ class BaseMetric
         $process = Process::fromShellCommandline($command);
         $process->run();
 
-        if ( ! $process->isSuccessful()) {
+        if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
 
