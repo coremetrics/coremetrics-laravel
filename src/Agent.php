@@ -6,6 +6,7 @@ use Psr\Log\LoggerInterface;
 use React\EventLoop\Factory;
 use React\Socket\ConnectionInterface;
 use React\Socket\Server;
+use WyriHaximus\React\PSR3\Stdio\StdioLogger;
 
 class Agent
 {
@@ -24,12 +25,12 @@ class Agent
     /** @var LoggerInterface */
     private $logger;
 
-    public function __construct(Config $config, LoggerInterface $logger)
+    public function __construct(Config $config)
     {
         $this->config = $config;
-        $this->logger = $logger;
 
         $this->loop = Factory::create();
+        $this->logger = StdioLogger::create($this->loop)->withNewLine(true);
         $this->socket = new Server($this->config->getAgentServerUri(), $this->loop);
     }
 
@@ -56,9 +57,11 @@ class Agent
                     }
                 );
 
-                $this->logger->debug('The Coremetrics daemon is listening on ' . $this->config->getAgentServerUri());
+                $this->logger->debug('Received connection from ' . $connection->getRemoteAddress());
             }
         );
+
+        $this->logger->debug('The Coremetrics daemon is listening on ' . $this->config->getAgentServerUri());
 
         $total = microtime(true);
 

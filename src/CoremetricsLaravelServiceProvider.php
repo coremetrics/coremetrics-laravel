@@ -98,7 +98,7 @@ class CoremetricsLaravelServiceProvider extends ServiceProvider
             'coremetrics.agent',
             static function (Application $app)
             {
-                return new Agent($app->make('coremetrics.config'), $app->make('coremetrics.logger'));
+                return new Agent($app->make('coremetrics.config'));
             }
         );
 
