@@ -2,8 +2,11 @@
 
 namespace Coremetrics\CoremetricsLaravel;
 
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\Factory;
+use React\Http\Browser;
+use React\Http\Message\ResponseException;
 use React\Socket\ConnectionInterface;
 use React\Socket\Server;
 
@@ -113,35 +116,34 @@ class Agent
             ]
         );
 
-        $ch = curl_init($serverUrl);
-
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $requestBody);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt(
-            $ch,
-            CURLOPT_HTTPHEADER,
+        (new Browser($this->loop))->post(
+            $serverUrl,
             [
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($requestBody),
+                'Content-Type' => 'application/json',
                 // NOTE(david): VERY IMPORTANT! The server needs to know what version the payload is to correctly
                 // interpret it, as we are likely to change it in the future.
-                'X-Coremetrics-Payload-Version: ' . Config::PAYLOAD_VERSION,
-            ]
-        );
-
-        $result = curl_exec($ch);
-
-        $errors = curl_error($ch);
-        $response = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        $this->logger->debug(
-            'Agent - postData response',
-            [
-                'response' => $result,
-                'errors' => $errors,
-                'response_detail' => $response,
-            ]
-        );
+                'X-Coremetrics-Payload-Version' => Config::PAYLOAD_VERSION,
+                'User-Agent' => 'CoreMetrics/' . Config::PAYLOAD_VERSION,
+            ],
+            $requestBody
+        )->then(function (ResponseInterface $response) {
+            $this->logger->debug(
+                'Agent - postData response',
+                [
+                    'response' => $response->getBody()->getContents(),
+                    'errors' => '',
+                    'response_detail' => $response->getStatusCode(),
+                ]
+            );
+        }, function (ResponseException $responseException) {
+            $this->logger->debug(
+                'Agent - postData response',
+                [
+                    'response' => $responseException->getResponse()->getBody()->getContents(),
+                    'errors' => $responseException->getMessage(),
+                    'response_detail' => $responseException->getResponse()->getStatusCode(),
+                ]
+            );
+        })->done();
     }
 }
