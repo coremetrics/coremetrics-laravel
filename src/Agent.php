@@ -46,11 +46,25 @@ class Agent
                     'data',
                     function ($data)
                     {
-                        $this->buffer[] = json_decode($data, true);
+                        $json = json_decode($data, true);
+                        if ($json !== null) {
+                            $this->buffer[] = $json;
+                            $this->logger->debug(
+                                'Agent received data',
+                                [
+                                    'data' => $data
+                                ]
+                            );
+
+                            return;
+                        }
+
                         $this->logger->debug(
-                            'Agent received data',
+                            'Agent received invalid data',
                             [
-                                'data' => $data
+                                'data' => $data,
+                                'error' => json_last_error_msg(),
+                                'error_code' => json_last_error(),
                             ]
                         );
                     }
