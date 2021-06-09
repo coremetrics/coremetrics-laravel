@@ -17,7 +17,7 @@ class Config
 
     public function getAgentLocationUri(): string
     {
-        return '127.0.0.1:8089';
+        return '127.0.0.1:' . $this->getAgentPort();
     }
 
     public function getRemoteApiUrl(): string
@@ -37,5 +37,10 @@ class Config
     public function getAgentDaemonCommandLine(): string
     {
         return 'php ' . base_path() . '/artisan cm:daemon:start > /dev/null 2>/dev/null &';
+    }
+    
+    private function getAgentPort(): int
+    {
+        return config('coremetrics.port', 8089);
     }
 }
