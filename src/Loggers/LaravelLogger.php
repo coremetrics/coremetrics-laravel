@@ -131,9 +131,9 @@ class LaravelLogger implements LoggerInterface
      */
     public function debug($message, array $context = [])
     {
-        if (config('app.debug')) {
-            $this->log(LogLevel::DEBUG, $message, $context);
-        }
+//        if (config('app.debug')) {
+//            $this->log(LogLevel::DEBUG, $message, $context);
+//        }
     }
 
     /**
